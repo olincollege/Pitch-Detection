@@ -210,7 +210,6 @@ class file_processesing:
     def plotter(self):
         pass
 
-
 Process1 = file_processesing("NeverGonnaGiveYouUp.wav")
 Process1.process_audio()
 # print(Process1.auto_correlation())
