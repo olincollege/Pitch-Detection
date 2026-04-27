@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-FIGURES_DIR = PROJECT_ROOT / "Figures"
+FIGURES_DIR = PROJECT_ROOT / "Pitch-Detection" / "New Figures"
 RECORDING_FILE = PROJECT_ROOT / "recording.wav"
 SUPPORTED_EXTENSIONS = [".mp4"]
 
@@ -47,7 +47,7 @@ class KaraokeModel:
         """Initialize the karaoke model with the figures directory.
 
         Args:
-            figures_dir (Path): The directory containing MP4 files. Defaults to FIGURES_DIR.
+            figures_dir (Path): The directory containing MP4 files. Defaults to FIGURES_DIR (Pitch-Detection/New Figures).
 
         Returns:
             None
@@ -65,7 +65,7 @@ class KaraokeModel:
         """Return the list of available MP4 song files.
 
         Returns:
-            A sorted list of MP4 filenames found in the Figures directory.
+            A sorted list of MP4 filenames found in the Pitch-Detection/New Figures directory.
         """
         if not self.figures_dir.exists():
             return []
