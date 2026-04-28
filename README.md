@@ -4,7 +4,7 @@ By Thanadetch (Detch) Mateedunsatits and Liam Bennicoff
 It uses a pitch detection algorithm to score karaoke singing. It requires .wav or .mp4 files from the user, specifically covering the vocal tracks of the song to test (reference audio) and the user's singing (user audio). It will score them from 50 to 100, purely on pitch. It uses the MIDI scale and has two levels of sensitivity, with one meant for beginners and another for those who are confident at singing. The sensitivity of the model and scoring system can be changed in karaoke_scorer.py. It also has a GUI to browse all tracks loaded into the program, as well as built-in recording, scoring, MIDI score over time, and playback features. 
 
 ## Features
-![](Starting_Screen.jpg)
+![](Example_Screen.jpg)
 1. Play, to play the video file. 
 2. Record, to play and record the video file.
 3. Stop/Pause, to stop the video file. The button shows up as pause if the video is already being played.
@@ -14,15 +14,21 @@ It uses a pitch detection algorithm to score karaoke singing. It requires .wav o
 
 ## Installation Instructions
 1. It is recommened to use Python 3.13.0 as that was the version the development team used
-2. `pip install -r requirements.txt`
-3. Check requirements are fufilled by heading over to the tests folders and running import_check
-4. 
 
-## Getting Started and file requirements (PLEASE READ THIS!)
+2. Download all require libraries via `pip install -r requirements.txt`
+
+3. Check requirements are fufilled by heading over to the `tests` folders and running `import_check.py`
+
+4. Download all the files from the repository.
+
+## Getting Started and file requirements (PLEASE READ!)
 ![](Starting_Screen.jpg)
-1. Getting your first audiofile
-2. Setting up your song backtrack list
-3. Setting up your song vocal list
+
+When starting your first run of the `main.py` you will encounter that there are no songs in the list. The user can add their own songs into the application through the `songs` folder. The songs should be `.mp4` format for the system to work best. Non-mp4 files will not show up on the left tab.
+
+1. Getting your first audiofile. The user may find it helpful to head to websites like `https://media.ytmp3.gg/youtube-to-mp4-converter` to convert the song they want to mp4 and put it into the folder to get it started.
+2. Setting up your song backtrack list.
+3. Setting up your song vocal list.
 
 ## Recording your first recording
 1. Click the record button 
