@@ -176,3 +176,74 @@ def has_recording(self) -> bool:
             True if a recording exists; otherwise False.
         """
         return self.recorded_audio is not None and len(self.recorded_audio) > 0
+# AudioRecorder class starts here
+class AudioRecorder:
+    """Helper that records microphone input until stopped or paused."""
+
+    def __init__(self, sample_rate: int = 44100, channels: int = 1):
+        """Initialize the audio recorder with sample rate and channels.
+
+        Args:
+            sample_rate (int): The sample rate for recording. Defaults to 44100.
+            channels (int): The number of audio channels. Defaults to 1.
+
+        Returns:
+            None
+        """
+        self.sample_rate = sample_rate
+        self.channels = channels
+        self._frames: List[np.ndarray] = []
+        self._stream = None
+        self._paused = False
+
+    def start(self) -> None:
+        """Open the input stream and begin recording immediately.
+
+        Returns:
+            None
+        """
+        self._frames = []
+        self._paused = False
+        self._stream = sd.InputStream(
+            samplerate=self.sample_rate,
+            channels=self.channels,
+            callback=self._callback,
+        )
+        self._stream.start()
+
+    def pause(self) -> None:
+        """Pause incoming recording without losing captured audio.
+
+        Returns:
+            None
+        """
+        if self._stream is not None:
+            self._paused = True
+
+    def resume(self) -> None:
+        """Resume recording after a pause.
+
+        Returns:
+            None
+        """
+        if self._stream is not None:
+            self._paused = False
+
+    def stop(self) -> np.ndarray:
+        """Stop recording and return the captured audio.
+
+        Returns:
+            The captured audio as a numpy array.
+        """
+        if self._stream is not None:
+            self._stream.stop()
+            self._stream.close()
+            self._stream = None
+        self._paused = False
+        if not self._frames:
+            return np.empty((0, self.channels), dtype="float32")
+        return np.concatenate(self._frames, axis=0)
+
+    def _callback(self, indata, _frames, _time, _status) -> None:
+        if not self._paused:
+            self._frames.append(np.copy(indata))
