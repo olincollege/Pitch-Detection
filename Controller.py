@@ -160,3 +160,21 @@ def pause_playback(self) -> None:
         if self.is_recording and not self.record_paused:
             self.recorder.pause()
             self.record_paused = True
+def on_stop(self) -> None:
+        """Stop all playback and recording activity and reset playback state."""
+        self.video_timer.stop()
+        self.view.timer.stop()
+        if self.video_capture is not None:
+            self.video_capture.release()
+            self.video_capture = None
+        sd.stop()
+        if self.is_recording:
+            self._stop_recording()
+        self.is_playing = False
+        self.is_paused = False
+        self.record_paused = False
+        self.playback_position_ms = 0
+        self.view.play_button.setText("Play")
+        self.view.record_button.setText("Record")
+        self.view.set_status("Ready")
+        self.view.clear_video()
