@@ -147,4 +147,32 @@ def load_audio_track(self) -> bool:
             self.sample_rate = 0
             return False
 
-   
+def save_recording(self, recording: np.ndarray, path: Optional[Path] = None) -> bool:
+        """
+        Summary:
+            Save the recorded vocals to a WAV file and cache the data.
+
+        Args:
+            recording: The recorded waveform.
+            path: Optional output path. Uses a default recording path if omitted.
+
+        Returns:
+            True if the file saved successfully; otherwise False.
+        """
+        target_path = Path(path) if path is not None else RECORDING_FILE
+        try:
+            sf.write(str(target_path), recording, self.recording_rate)
+            self.recorded_audio = recording
+            return True
+        except Exception:
+            return False
+
+def has_recording(self) -> bool:
+        """
+        Summary:
+            Return True when a recording is available.
+
+        Returns:
+            True if a recording exists; otherwise False.
+        """
+        return self.recorded_audio is not None and len(self.recorded_audio) > 0
