@@ -220,7 +220,7 @@ def _stop_recording(self) -> None:
         self.record_paused = False
         self.view.record_button.setText("Record")
         self.view.set_status("Recording saved")
-        
+
 def on_playback_recording(self) -> None:
         """Play the selected video together with the user's saved recording from the start.
 
@@ -263,3 +263,41 @@ def on_playback_recording(self) -> None:
         self.view.update_progress(0, self.video_length_ms)
         self._show_next_frame()
         self.view.set_status("Playing recorded performance")
+def _prepare_combined_audio(self, offset_ms: int) -> Optional[np.ndarray]:
+        """Prepare a stereo mixed waveform of original audio plus the user's recording."""
+        if self.model.audio_data is None or self.model.recorded_audio is None:
+            return None
+        sample_rate = self.model.sample_rate
+        if sample_rate <= 0:
+            return None
+
+        recorded_audio = self.model.recorded_audio
+        recorded_audio = self._resample_recording_if_needed(recorded_audio)
+        recorded_audio = self._normalize_recording_volume(recorded_audio)
+
+        start_sample = int(round(offset_ms * sample_rate / 1000.0))
+        original_segment = self.model.audio_data[start_sample:]
+        if original_segment.ndim == 1:
+            original_segment = original_segment[:, None]
+
+        recorded_segment = recorded_audio[start_sample:]
+        if recorded_segment.ndim == 1:
+            recorded_segment = recorded_segment[:, None]
+        if recorded_segment.shape[1] == 1:
+            recorded_segment = np.repeat(recorded_segment, 2, axis=1)
+        elif recorded_segment.shape[1] > 2:
+            recorded_segment = recorded_segment[:, :2]
+
+        if recorded_segment.shape[0] < original_segment.shape[0]:
+            padding = np.zeros(
+                (original_segment.shape[0] - recorded_segment.shape[0], recorded_segment.shape[1]),
+                dtype=recorded_segment.dtype,
+            )
+            recorded_segment = np.vstack((recorded_segment, padding))
+        else:
+            recorded_segment = recorded_segment[: original_segment.shape[0], :]
+
+        original_float = original_segment.astype(np.float32, copy=False)
+        recorded_float = recorded_segment.astype(np.float32, copy=False)
+        mixed = np.clip(original_float * 0.35 + recorded_float * 0.9, -1.0, 1.0)
+        return mixed
