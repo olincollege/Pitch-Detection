@@ -331,3 +331,36 @@ def _resample_recording_if_needed(self, recorded_audio: np.ndarray) -> np.ndarra
             target_times = np.linspace(0.0, duration_seconds, num=target_length, endpoint=False)
             resampled[:, channel] = np.interp(target_times, source_times, recorded_audio[:, channel])
         return resampled
+def _show_next_frame(self) -> None:
+        """Fetch the next video frame synced to the current audio playback time."""
+        if self.video_capture is None:
+            return
+        if self.play_start_time > 0:
+            elapsed_ms = int((time.monotonic() - self.play_start_time) * 1000)
+            desired_ms = self.seek_start_ms + elapsed_ms
+        else:
+            desired_ms = self.playback_position_ms
+        if desired_ms >= self.video_length_ms:
+            self.on_stop()
+            return
+        current_ms = int(self.video_capture.get(cv2.CAP_PROP_POS_MSEC))
+        if desired_ms > current_ms + self.video_frame_interval * 2:
+            self.video_capture.set(cv2.CAP_PROP_POS_MSEC, float(desired_ms))
+            success, frame = self.video_capture.read()
+        else:
+            success, frame = self.video_capture.read()
+            while success and int(self.video_capture.get(cv2.CAP_PROP_POS_MSEC)) < desired_ms - self.video_frame_interval:
+                success, frame = self.video_capture.read()
+        if not success:
+            self.on_stop()
+            return
+        self.view.set_video_frame(frame)
+        position_ms = int(self.video_capture.get(cv2.CAP_PROP_POS_MSEC))
+        self.view.update_progress(position_ms, self.video_length_ms)
+
+def update_ui(self) -> None:
+        """Refresh the playback progress indicator while the media is active."""
+        if not self.is_playing or self.video_capture is None:
+            return
+        position_ms = int(self.video_capture.get(cv2.CAP_PROP_POS_MSEC))
+        self.view.update_progress(position_ms, self.video_length_ms)
