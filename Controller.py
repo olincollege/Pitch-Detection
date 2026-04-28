@@ -301,3 +301,33 @@ def _prepare_combined_audio(self, offset_ms: int) -> Optional[np.ndarray]:
         recorded_float = recorded_segment.astype(np.float32, copy=False)
         mixed = np.clip(original_float * 0.35 + recorded_float * 0.9, -1.0, 1.0)
         return mixed
+def _normalize_recording_volume(self, recorded_audio: np.ndarray) -> np.ndarray:
+        """Normalize the user's recorded audio to produce a more consistent voice level."""
+        if recorded_audio.ndim == 1:
+            recorded_audio = recorded_audio[:, None]
+        recorded_float = recorded_audio.astype(np.float32, copy=False)
+        rms = np.sqrt(np.mean(np.square(recorded_float), axis=0, keepdims=True))
+        target_rms = 0.15
+        gain = np.where(rms > 0, target_rms / np.maximum(rms, 1e-8), 1.0)
+        normalized = recorded_float * gain
+        return np.clip(normalized, -1.0, 1.0)
+
+def _resample_recording_if_needed(self, recorded_audio: np.ndarray) -> np.ndarray:
+        """Resample the recorded audio to the current playback sample rate if necessary."""
+        if self.model.recording_rate == self.model.sample_rate:
+            return recorded_audio
+        if recorded_audio.ndim == 1:
+            recorded_audio = recorded_audio[:, None]
+        source_rate = self.model.recording_rate
+        target_rate = self.model.sample_rate
+        if source_rate <= 0 or target_rate <= 0:
+            return recorded_audio
+
+        duration_seconds = recorded_audio.shape[0] / source_rate
+        target_length = int(round(duration_seconds * target_rate))
+        resampled = np.zeros((target_length, recorded_audio.shape[1]), dtype=np.float32)
+        for channel in range(recorded_audio.shape[1]):
+            source_times = np.linspace(0.0, duration_seconds, num=recorded_audio.shape[0], endpoint=False)
+            target_times = np.linspace(0.0, duration_seconds, num=target_length, endpoint=False)
+            resampled[:, channel] = np.interp(target_times, source_times, recorded_audio[:, channel])
+        return resampled
