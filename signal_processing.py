@@ -20,39 +20,51 @@ class PitchScoring:
         self.ref_pitch = None
         self.user_pitch = None
 
-    def extract_pitch(self, audio_file, sensitivity=0.1):
+    def extract_pitch(self, audio_file, algorithm_type="pYIN", sensitivity=0.1):
         """
         It recieves the file name of the audio and returns a nparray of the pitches.
-        This program ses a sample rate of 22050 and other defaults to Librosa's piptrack
-        method. It has a frequency range of 60 to 1000, which is the human vocal range.
-        It uses a threshold to identifying singing moments at 0.1 for voice probability.
-        It implments the probalistic yin algorithm to detect pitch. This method is highly
+        It has a frequency range of 60 to 1000, which is the human vocal range.
+        It uses a default threshold to identifying singing moments at 0.1 for voice probability.
+        By default it implments the probalistic yin algorithm to detect pitch. This method is highly
         resistant to octave error making it ideal for extracting karaoke singing.
+        YIN algorithm is similar but inferior in terms of extracting the right pitches 
+        at the right moment, but much better for visualization, so both are implemented.
 
         Args:
             audio_file, a String representing the name of the audiofile
-            sensitivity, an float representing the threshold sensitivity of the pyin() algorithm
-                        by default this value is set to 0.1
+            algorithm_type, a String representing the algorithm we run to exact audio.
+                            By default it is set to pYIN, but it also possible to set to the 
+                            YIN algorithm (YIN). 
+            sensitivity, an float representing the threshold sensitivity of the yin() and 
+                        pyin() algorithm by default this value is set to 0.1
 
         Returns:
             pitch_track, a numpy array of the pitches in the track
         """
-
         audio, sample_rate = librosa.load(audio_file)
-        pitch_track, voiced_flag, voiced_probs = librosa.pyin(
-            y=audio, sr=sample_rate, fmin=60.0, fmax=1000.0
-        )
-        pitch_track[~voiced_flag] = np.nan
-        pitch_track[voiced_probs < sensitivity] = np.nan
+        if algorithm_type == "YIN":
+            pitch_track = librosa.yin(y=audio, sr=sample_rate, fmin=60.0, fmax=1000.0, trough_threshold = sensitivity)
+        if algorithm_type == "pYIN":
+            pitch_track, voiced_flag, voiced_probs = librosa.pyin(
+                y=audio, sr=sample_rate, fmin=60.0, fmax=1000.0
+            )
+            pitch_track[~voiced_flag] = np.nan
+            pitch_track[voiced_probs < sensitivity] = np.nan
 
         return pitch_track
 
-    def process_files(self):
+    def process_files(self, algorithm_type="pYIN"):
         """
-        Processes the files for both the reference and the user
+        Processes the files for both the reference and the user and sets
+        the pitches to the files.
+        
+        Args:
+            algorithm_type, a String representing the algorithm we run to exact audio.
+                            By default it is set to pYIN, but it also possible to set to the 
+                            YIN algorithm (YIN). 
         """
-        self.ref_pitch = self.extract_pitch(self.ref_file)
-        self.user_pitch = self.extract_pitch(self.user_file)
+        self.ref_pitch = self.extract_pitch(self.ref_file, algorithm_type)
+        self.user_pitch = self.extract_pitch(self.user_file, algorithm_type)
 
     def align_tracks(self):
         """
@@ -119,9 +131,12 @@ class PitchScoring:
 
     def plot_results(self):
         """
-        Creates a plot of midi-score, time (in seconds) graph of the singer.
+        Creates a plot of midi-score, time (in seconds) graph of the singer using the YIN algorithm.
         """
         duration = librosa.get_duration(path=self.user_file)
+        self.process_files("YIN")
+        self.align_tracks()
+
         time = np.arange(len(self.user_pitch)) * (duration) / (len(self.user_pitch))
         plt.figure()
         plt.plot(
@@ -134,15 +149,3 @@ class PitchScoring:
         plt.legend()
         plt.grid()
         plt.show()
-
-
-# Users should change the "user" section to test their attempt on the Song "Perfect"
-# If the reference song and user section can both be swapped for any .wav file or .mp4 file
-
-# reference             # user
-processor = PitchScoring("PerfectVocals_2.wav", "Itim_Perfect.wav")
-processor.process_files()
-processor.align_tracks()
-scores = processor.pitch_score(level=0)
-print(scores)
-processor.plot_results()
