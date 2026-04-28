@@ -35,5 +35,29 @@ from PyQt5.QtWidgets import (
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FIGURES_DIR = PROJECT_ROOT / "Pitch-Detection" / "New Figures"
-RECORDING_FILE = PROJECT_ROOT / "recording.wav"
+RECORDING_FILE = PROJECT_ROOT / "recording.wav" 
 SUPPORTED_EXTENSIONS = [".mp4"]
+
+# KaraokeModel class starts here
+class KaraokeModel:
+    """Model that tracks song selection, audio data, and recorded vocals."""
+
+    def __init__(self, figures_dir: Path = FIGURES_DIR):
+        """
+        Summary: 
+            Initialize the karaoke model with the figures directory.
+
+        Args:
+            figures_dir (Path): The directory containing MP4 files. Defaults to FIGURES_DIR (Pitch-Detection/New Figures).
+
+        Returns:
+            None
+        """
+        self.figures_dir = Path(figures_dir)
+        self.songs: List[str] = self.list_songs()
+        self.selected_song: Optional[str] = None
+        self.selected_path: Optional[Path] = None
+        self.audio_data: Optional[np.ndarray] = None
+        self.sample_rate: int = 0 
+        self.recorded_audio: Optional[np.ndarray] = None 
+        self.recording_rate: int = 44100
