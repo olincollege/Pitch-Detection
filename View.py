@@ -149,7 +149,7 @@ def set_status(self, text: str) -> None:
         """
         """Update the status label text."""
         self.status_label.setText(text)
-        
+
 def load_video(self, path: str) -> None:
         """Show a placeholder for the selected video file.
 
@@ -193,3 +193,24 @@ def clear_video(self) -> None:
         self.video_label.setPixmap(QPixmap())
         self.video_label.setText("Select a song to load video")
         self.video_label.setStyleSheet("background-color: black; color: white;")
+        
+def update_progress(self, position_ms: int, duration_ms: int) -> None:
+        """Update the progress bar using media position and duration.
+
+        Args:
+            position_ms (int): Current position in milliseconds.
+            duration_ms (int): Total duration in milliseconds.
+
+        Returns:
+            None
+        """
+        """Update the progress bar using media position and duration."""
+        if duration_ms <= 0:
+            return
+        ratio = min(max(position_ms / duration_ms, 0.0), 1.0)
+        self.progress.setValue(int(ratio * 100))
+        current_seconds = position_ms // 1000
+        duration_seconds = duration_ms // 1000
+        self.status_label.setText(
+            f"{current_seconds // 60:02d}:{current_seconds % 60:02d} / {duration_seconds // 60:02d}:{duration_seconds % 60:02d}"
+        )
