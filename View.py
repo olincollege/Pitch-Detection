@@ -1,27 +1,17 @@
-import os
-import sys
-import time
+# -*- coding: utf-8 -*-
+"""
+Karaoke app view layer for song selection, video display, and playback controls.
+"""
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import cv2
-import imageio_ffmpeg as ffmpeg
 import numpy as np
-import sounddevice as sd
-import soundfile as sf
-import subprocess
 from PyQt5.QtCore import QTimer, Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QImage, QPixmap
-from PyQt5.QtWidgets import (
-    QApplication,
-    QLabel,
-    QListWidget,
-    QPushButton,
-    QProgressBar,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import QLabel, QListWidget, QPushButton, QProgressBar, QVBoxLayout, QHBoxLayout, QWidget
+
+
 class KaraokeView(QWidget):
     """View layer that displays the song list, video widget, and player controls."""
 
@@ -31,26 +21,31 @@ class KaraokeView(QWidget):
     playback_pressed = pyqtSignal()
     song_selected = pyqtSignal(str)
 
-def __init__(self, model: KaraokeModel):
-        """Initialize the karaoke view with the model.
+    def __init__(self, model) -> None:
+        """
+        Summary:
+            Initialize the karaoke view with the model.
 
         Args:
-            model (KaraokeModel): The model instance for the view.
+            model: The model instance for the view.
 
         Returns:
             None
         """
         super().__init__()
         self.model = model
-        self.setWindowTitle("Mister Microphone")
+        self.setWindowTitle('Mister Microphone')
         self.setGeometry(100, 100, 1200, 900)
-        self.video_label = QLabel("Select a song to load video")
+        self.video_label = QLabel('Select a song to load video')
         self.video_label.setAlignment(Qt.AlignCenter)
-        self.video_label.setStyleSheet("background-color: black; color: white;")
+        self.video_label.setStyleSheet('background-color: black; color: white;')
         self._build_ui()
         self.timer = QTimer(self)
-def _build_ui(self) -> None:
-        """Create the main user interface widgets.
+
+    def _build_ui(self) -> None:
+        """
+        Summary:
+            Create the main user interface widgets.
 
         Returns:
             None
@@ -58,14 +53,14 @@ def _build_ui(self) -> None:
         self.song_list = QListWidget()
         self.song_list.currentItemChanged.connect(self._on_song_selection)
 
-        heading = QLabel("Choose a song from the list and press Play")
-        heading.setFont(QFont("Arial", 20, QFont.Bold))
+        heading = QLabel('Choose a song from the list and press Play')
+        heading.setFont(QFont('Arial', 20, QFont.Bold))
         heading.setAlignment(Qt.AlignCenter)
 
-        self.play_button = QPushButton("Play")
-        self.record_button = QPushButton("Record")
-        self.stop_button = QPushButton("Stop")
-        self.playback_button = QPushButton("Playback Recording")
+        self.play_button = QPushButton('Play')
+        self.record_button = QPushButton('Record')
+        self.stop_button = QPushButton('Stop')
+        self.playback_button = QPushButton('Playback Recording')
 
         self.play_button.clicked.connect(self.play_pressed.emit)
         self.record_button.clicked.connect(self.record_pressed.emit)
@@ -77,7 +72,7 @@ def _build_ui(self) -> None:
             button.setMinimumHeight(50)
             control_layout.addWidget(button)
 
-        self.status_label = QLabel("Ready")
+        self.status_label = QLabel('Ready')
         self.status_label.setAlignment(Qt.AlignCenter)
 
         self.progress = QProgressBar()
@@ -87,7 +82,7 @@ def _build_ui(self) -> None:
         video_layout.addWidget(self.video_label)
 
         list_layout = QVBoxLayout()
-        list_layout.addWidget(QLabel("Available Songs"))
+        list_layout.addWidget(QLabel('Available Songs'))
         list_layout.addWidget(self.song_list)
 
         main_layout = QVBoxLayout()
@@ -102,8 +97,11 @@ def _build_ui(self) -> None:
         main_layout.addWidget(self.progress)
         main_layout.addWidget(self.status_label)
         self.setLayout(main_layout)
-def _on_song_selection(self, current, previous=None) -> None:
-        """Handle song selection from the view.
+
+    def _on_song_selection(self, current, previous=None) -> None:
+        """
+        Summary:
+            Handle song selection from the view.
 
         Args:
             current: The currently selected item.
@@ -116,8 +114,10 @@ def _on_song_selection(self, current, previous=None) -> None:
         if item is not None:
             self.song_selected.emit(item.text())
 
-def set_song_list(self, songs: List[str]) -> None:
-        """Populate the song list with available MP4 titles.
+    def set_song_list(self, songs: List[str]) -> None:
+        """
+        Summary:
+            Populate the song list with available MP4 titles.
 
         Args:
             songs (List[str]): List of song filenames.
@@ -129,17 +129,21 @@ def set_song_list(self, songs: List[str]) -> None:
         for song in songs:
             self.song_list.addItem(song)
 
-def get_selected_song_name(self) -> str:
-        """Return the currently selected song title.
+    def get_selected_song_name(self) -> str:
+        """
+        Summary:
+            Return the currently selected song title.
 
         Returns:
             The selected song name or empty string if none.
         """
         item = self.song_list.currentItem()
-        return item.text() if item is not None else ""
+        return item.text() if item is not None else ''
 
-def set_status(self, text: str) -> None:
-        """Update the status label text.
+    def set_status(self, text: str) -> None:
+        """
+        Summary:
+            Update the status label text.
 
         Args:
             text (str): The status text to display.
@@ -147,11 +151,12 @@ def set_status(self, text: str) -> None:
         Returns:
             None
         """
-        """Update the status label text."""
         self.status_label.setText(text)
 
-def load_video(self, path: str) -> None:
-        """Show a placeholder for the selected video file.
+    def load_video(self, path: str) -> None:
+        """
+        Summary:
+            Show a placeholder for the selected video file.
 
         Args:
             path (str): The path to the video file.
@@ -159,12 +164,13 @@ def load_video(self, path: str) -> None:
         Returns:
             None
         """
-        """Show a placeholder for the selected video file."""
-        self.video_label.setText(f"Loaded: {Path(path).name}")
-        self.video_label.setStyleSheet("background-color: black; color: white;")
+        self.video_label.setText(f'Loaded: {Path(path).name}')
+        self.video_label.setStyleSheet('background-color: black; color: white;')
 
-def set_video_frame(self, frame: np.ndarray) -> None:
-        """Render a video frame into the video display widget.
+    def set_video_frame(self, frame: np.ndarray) -> None:
+        """
+        Summary:
+            Render a video frame into the video display widget.
 
         Args:
             frame (np.ndarray): The video frame as a numpy array.
@@ -172,7 +178,6 @@ def set_video_frame(self, frame: np.ndarray) -> None:
         Returns:
             None
         """
-        """Render a video frame into the video display widget."""
         target_width = self.video_label.width() or frame.shape[1]
         target_height = self.video_label.height() or frame.shape[0]
         if frame.shape[1] != target_width or frame.shape[0] != target_height:
@@ -183,19 +188,22 @@ def set_video_frame(self, frame: np.ndarray) -> None:
         pixmap = QPixmap.fromImage(image)
         self.video_label.setPixmap(pixmap)
 
-def clear_video(self) -> None:
-        """Clear the video display and show the default placeholder.
+    def clear_video(self) -> None:
+        """
+        Summary:
+            Clear the video display and show the default placeholder.
 
         Returns:
             None
         """
-        """Clear the video display and show the default placeholder."""
         self.video_label.setPixmap(QPixmap())
-        self.video_label.setText("Select a song to load video")
-        self.video_label.setStyleSheet("background-color: black; color: white;")
-        
-def update_progress(self, position_ms: int, duration_ms: int) -> None:
-        """Update the progress bar using media position and duration.
+        self.video_label.setText('Select a song to load video')
+        self.video_label.setStyleSheet('background-color: black; color: white;')
+
+    def update_progress(self, position_ms: int, duration_ms: int) -> None:
+        """
+        Summary:
+            Update the progress bar using media position and duration.
 
         Args:
             position_ms (int): Current position in milliseconds.
@@ -204,7 +212,6 @@ def update_progress(self, position_ms: int, duration_ms: int) -> None:
         Returns:
             None
         """
-        """Update the progress bar using media position and duration."""
         if duration_ms <= 0:
             return
         ratio = min(max(position_ms / duration_ms, 0.0), 1.0)
