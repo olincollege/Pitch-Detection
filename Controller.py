@@ -108,3 +108,55 @@ def _open_video_capture(self, start_ms: int = 0) -> bool:
         if start_ms > 0:
             self.video_capture.set(cv2.CAP_PROP_POS_MSEC, float(start_ms))
         return True
+
+def start_playback(self) -> None:
+        """Begin video playback and immediate audio output from the selected song."""
+        if not self.model.load_audio_track():
+            self.view.set_status("Unable to load audio track")
+            return
+        if not self._open_video_capture(self.playback_position_ms):
+            return
+        self.seek_start_ms = self.playback_position_ms
+        self.is_playing = True
+        self.is_paused = False
+        self.view.play_button.setText("Pause")
+        self.view.timer.start(100)
+        try:
+            start_sample = int(round(self.playback_position_ms * self.model.sample_rate / 1000.0))
+            sd.play(self.model.audio_data[start_sample:], self.model.sample_rate)
+        except Exception:
+            self.view.set_status("Audio playback failed")
+            return
+        self.play_start_time = time.monotonic()
+        self.video_timer.start(self.video_frame_interval)
+        self._show_next_frame()
+        self.view.set_status("Playing")
+
+def resume_playback(self) -> None:
+        """Resume playback from the point where it was paused."""
+        if self.model.selected_path is None:
+            self.view.set_status("Select a song before pressing Play")
+            return
+        if self.is_recording and self.record_paused:
+            self.recorder.resume()
+            self.record_paused = False
+        self.start_playback()
+
+def pause_playback(self) -> None:
+        """Pause the active playback session and preserve the current position."""
+        if self.play_start_time > 0:
+            elapsed_ms = int((time.monotonic() - self.play_start_time) * 1000)
+            self.playback_position_ms = self.seek_start_ms + elapsed_ms
+        elif self.video_capture is not None:
+            self.playback_position_ms = int(self.video_capture.get(cv2.CAP_PROP_POS_MSEC))
+        self.play_start_time = 0.0
+        self.video_timer.stop()
+        self.view.timer.stop()
+        sd.stop()
+        self.is_playing = False
+        self.is_paused = True
+        self.view.play_button.setText("Play")
+        self.view.set_status("Paused")
+        if self.is_recording and not self.record_paused:
+            self.recorder.pause()
+            self.record_paused = True
