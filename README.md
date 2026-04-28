@@ -10,7 +10,7 @@ It uses a pitch detection algorithm to score karaoke singing. It requires .wav o
 3. Stop/Pause, to stop the video file. The button shows up as pause if the video is already being played.
 4. Playback, to play back the user's singing overlayed on the musical back track.
 5. Score, displays a score from 50 to 100 depending on how well you sung.
-6. Waveform viewer, display a waveform generator of the user's singing as well as the vocal track.
+6. Waveform viewer, display a waveform of the user's singing as well as the vocal track.
 
 ## Installation Instructions
 1. It is recommened to use Python 3.13.0 as that was the version the development team used
@@ -24,18 +24,20 @@ It uses a pitch detection algorithm to score karaoke singing. It requires .wav o
 ## Getting Started and file requirements (PLEASE READ!)
 ![](Starting_Screen.jpg)
 
-When starting your first run of the `main.py` you will encounter that there are no songs in the list. The user can add their own songs into the application through the `songs` folder. The songs should be `.mp4` format for the system to work best. Non-mp4 files will not show up on the left tab.
+When starting your first run of the `main.py` you will encounter that there are no songs in the list. The user can add their own songs into the application through the `Songs` folder. The songs should be `.mp4` format for the system to work best. Non-mp4 files will not show up on the left tab.
 
-1. Getting your first audiofile. The user may find it helpful to head to websites like `https://media.ytmp3.gg/youtube-to-mp4-converter` to convert the song they want to mp4 and put it into the folder to get it started.
-2. Setting up your song backtrack list.
-3. Setting up your song vocal list.
+1. Getting your first audiofile. The user may find it helpful to head to websites like `https://media.ytmp3.gg/youtube-to-mp4-converter` to convert the song they want to mp4 and put it into the folder to get it started. The YouTube channel SingKing or other Karaoke song providers on the internt are good places to start.
+2. Setting up your song list in `Songs` and try running `main.py` again
 
-## Recording your first recording
-1. Click the record button 
+## Recording your first recording and Your first Score
+![](Example_Pitch.jpg)
+1. Select a song and click the record button
+2. Once it has finish, WAIT WAIT WAIT. The program will freeze on you as it tries to compute the extremely intensive probalistic YIN process to get the score. Be patient please! It may take over a minute at times. This is not a bug. Exercise patience please.
+3. Click the waveform button if you want to see the waveform. The calculation used a probalistic YIN model which is far more resistant to spikes than the one shown on the graph but produces sparser data points; hence, we've used the YIN model to produce more useful visualization. Both models should produce similar results and it's possible to override the scoring into a YIN through the functions in `Model.py`
 
 ## Unit Testing
 ### Karaoke Scorer and Scoring system
-- Download itim_perfect.wav (sample user audio) needed to test.
+- Download itim_perfect.wav (sample user audio) needed to test. It is located in the `tests` folder
 - Find an acapella cover of Perfect by Ed Sheeran and convert it to a .wav file using the method mentioned above.
 - Rename the file to PerfectVocals or adjust the filename in karaoke_scorer_test.py to align with whatever filename you chose
 - Run the karaoke_scorer_test file
@@ -43,5 +45,6 @@ When starting your first run of the `main.py` you will encounter that there are 
 ### Main MVC tests
 - Located in the tests folder
 - Adjust the filepath in the media_test files to adjust for the various songs the user wants to test out.
-## Known issues and fixes
-1. If you're an Oliner, using an Olin laptop, or using the laptop recording device and listening to it without a headphone, the speaker background noise will intrude on the audio file causing the analysis to be errorneous if using the vocals track. Opt to use a full MV version as the reference if you're doing this. The user could also resolve this issue by using headphones while recording.
+
+### Known issues
+1. There seems to be strong ringing behavior when using the Olin laptop microphone specifically. It seems to be a recorder specific issue as the testing shows that a clear audio recording from another source could yield scores as high as 94. 

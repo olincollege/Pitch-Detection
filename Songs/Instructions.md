@@ -1,0 +1,2 @@
+1. Getting your first audiofile. The user may find it helpful to head to websites like `https://media.ytmp3.gg/youtube-to-mp4-converter` to convert the song they want to mp4 and put it into the folder to get it started.
+2. If you source your songs from other places on the internet, be sure to convert it to .mp4
